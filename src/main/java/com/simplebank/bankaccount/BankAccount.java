@@ -1,5 +1,7 @@
 package com.simplebank.bankaccount;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,7 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,18 +20,8 @@ import com.simplebank.customer.Customer;
 @JsonIgnoreProperties(value = "owner")
 public class BankAccount {
     @Id
-    @SequenceGenerator(
-            name = "account_sequence",
-            sequenceName = "account_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "account_sequence"
-    )
-    @Column(
-            name = "id"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(
@@ -45,6 +37,12 @@ public class BankAccount {
             nullable = false
     )
     private Customer owner;
+
+	@OneToMany(mappedBy = "sourceAccount")
+    private Set<BankAccountTransaction> transactionSource;
+
+	@OneToMany(mappedBy = "destAccount")
+    private Set<BankAccountTransaction> transactionDest;
 
 	public BankAccount() {
 	}
