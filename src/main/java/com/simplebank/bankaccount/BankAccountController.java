@@ -1,8 +1,10 @@
 package com.simplebank.bankaccount;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+// TODO This will need an update to get the user from the JWT Token.
 @RestController
 @RequestMapping(path = "account")
 public class BankAccountController {
@@ -27,11 +30,21 @@ public class BankAccountController {
         return bankAccountServ.createAccount(ownerId, balance);
     }
 
-    @PutMapping(path = "{sourceId}/transfer")
+    @PutMapping(path = "transfer/{sourceId}")
     public void transferBalance(
         @PathVariable(name = "sourceId") Long sourceId,
         @RequestParam("destId") Long destId,
         @RequestParam("amount") Double amount) {
         bankAccountServ.transferBalance(sourceId, destId, amount);
+    }
+
+    @GetMapping(path = "balance/{id}")
+    public Double getBalance(@PathVariable(name = "id") Long id) {
+        return bankAccountServ.getBalance(id);
+    }
+
+    @GetMapping(value="transactions/{id}")
+    public List<BankAccountTransaction> getTransactions(@PathVariable(name = "id") Long id) {
+        return bankAccountServ.getTransactions(id);
     }
 }

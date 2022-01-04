@@ -1,24 +1,31 @@
 package com.simplebank.bankaccount;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.simplebank.bankaccount.exceptions.BankAccountHandlingException;
 import com.simplebank.customer.Customer;
-import com.simplebank.customer.CustomerService;
+import com.simplebank.customer.CustomerRepository;
 import com.simplebank.customer.exceptions.CustomerHandlingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+// TODO This will need an update to get the user from the JWT Token.
 @Service
 public class BankAccountService {
     private final BankAccountRepository bankAccountRepo;
-    private final CustomerService customerService;
+    private final CustomerRepository customerRepo;
+    private final BankAccountTransactionRepository accTransactionsRepo;
 
     @Autowired
-    public BankAccountService(BankAccountRepository bankAccountRepo, CustomerService customerService) {
+    public BankAccountService(
+        BankAccountRepository bankAccountRepo,
+        CustomerRepository customerRepo,
+        BankAccountTransactionRepository accTransactionsRepo) {
         this.bankAccountRepo = bankAccountRepo;
-        this.customerService = customerService;
+        this.customerRepo = customerRepo;
+        this.accTransactionsRepo = accTransactionsRepo;
     }
 
     public BankAccount createAccount(Long ownerId, Optional<Double> balance) {
@@ -28,7 +35,7 @@ public class BankAccountService {
             actualBalance = balance.get();
         }
 
-        Optional<Customer> customer = customerService.getCustomer(ownerId);
+        Optional<Customer> customer = customerRepo.findById(ownerId);
 
         if (!customer.isPresent()) {
             throw new CustomerHandlingException("Invalid owner!");
@@ -43,15 +50,19 @@ public class BankAccountService {
             throw new BankAccountHandlingException("Can't transfer to the same account!");
         }
 
+        if (amount <= 0.0D) {
+            throw new BankAccountHandlingException("Transference values must be bigger than 0!");
+        }
+
         Optional<BankAccount> bankAccount = bankAccountRepo.findById(sourceId);
 
         if (!bankAccount.isPresent()) {
             throw new BankAccountHandlingException("Invalid account!");
         }
 
-        Optional<BankAccount> tBankAccount = bankAccountRepo.findById(destId);
+        Boolean destAccountExists = bankAccountRepo.existsById(destId);
 
-        if (!tBankAccount.isPresent()) {
+        if (!destAccountExists) {
             throw new BankAccountHandlingException("Invalid transfer account!");
         }
 
@@ -63,5 +74,25 @@ public class BankAccountService {
         }
 
         bankAccountRepo.transferBalance(sourceId, destId, amount);
+    }
+
+    public Double getBalance(Long id) {
+        Optional<BankAccount> bankAccount = bankAccountRepo.findById(id);
+
+        if (!bankAccount.isPresent()) {
+            throw new BankAccountHandlingException("Invalid account!");
+        }
+
+        return bankAccount.get().getBalance();
+    }
+
+    public List<BankAccountTransaction> getTransactions(Long id) {
+        Boolean accountExists = bankAccountRepo.existsById(id);
+
+        if (!accountExists) {
+            throw new BankAccountHandlingException("Invalid account!");
+        }
+
+        return accTransactionsRepo.findAllTransactionsById(id);
     }
 }

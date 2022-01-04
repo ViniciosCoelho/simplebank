@@ -17,7 +17,7 @@ import com.simplebank.customer.Customer;
 
 @Entity
 @Table
-@JsonIgnoreProperties(value = "owner")
+@JsonIgnoreProperties(value = {"owner", "balance"})
 public class BankAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +47,7 @@ public class BankAccount {
 	public BankAccount() {
 	}
  
-    public BankAccount(Customer owner, double balance) {
+    public BankAccount(Customer owner, Double balance) {
         this.owner = owner;
         this.balance = balance;
     }
