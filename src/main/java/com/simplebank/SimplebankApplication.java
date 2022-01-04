@@ -11,6 +11,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
 public class SimplebankApplication {
@@ -21,11 +23,16 @@ public class SimplebankApplication {
 	@Bean
     CommandLineRunner commandLineRunner(CustomerRepository customerRepository) {
 		return args -> {
-			Customer customer = new Customer("teste", "teste");
+			Customer customer = new Customer("teste", passwordEncoder().encode("teste"));
 			Set<BankAccount> accounts = new HashSet<>();
 			accounts.add(new BankAccount(customer, 1000.0D));
 			customer.setAccounts(accounts);
 			customerRepository.save(customer);
 		};
 	}
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
