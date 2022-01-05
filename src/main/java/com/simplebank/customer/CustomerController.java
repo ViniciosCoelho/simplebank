@@ -31,6 +31,4 @@ public class CustomerController {
 	public Customer createCustomer(@Valid @RequestBody Customer customer) {
 		return customerService.createCustomer(customer);
 	}
-
-	
 }

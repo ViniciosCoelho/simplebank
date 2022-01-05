@@ -12,15 +12,18 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerService implements UserDetailsService {
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder pwdEncoder;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, PasswordEncoder pwdEncoder) {
         this.customerRepository = customerRepository;
+        this.pwdEncoder = pwdEncoder;
     }
 
     public Optional<Customer> getCustomer(Long id) {
@@ -40,6 +43,9 @@ public class CustomerService implements UserDetailsService {
             throw new CustomerHandlingException("User already exists!");
         }
 
+        String encodedPwd = pwdEncoder.encode(customer.getPassword());
+        customer.setPassword(encodedPwd);
+
         return customerRepository.save(customer);
     }
 
@@ -55,7 +61,7 @@ public class CustomerService implements UserDetailsService {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         User appUser = new User(customer.getUsername(), customer.getPassword(), authorities);
-        
+
         return appUser;
     }
 }

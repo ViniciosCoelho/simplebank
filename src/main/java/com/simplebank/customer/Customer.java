@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.simplebank.bankaccount.BankAccount;
 
 @Entity
@@ -19,6 +20,10 @@ import com.simplebank.bankaccount.BankAccount;
         name = "uq_customer_username",
         columnNames = "username"
     )
+)
+@JsonIgnoreProperties(
+    value = {"id", "password"},
+    allowSetters = true
 )
 public class Customer {
     @Id
