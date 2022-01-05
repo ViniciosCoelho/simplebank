@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-// TODO This will need an update to get the user from the JWT Token.
 @Service
 public class BankAccountService {
     private final BankAccountRepository bankAccountRepo;
@@ -52,9 +51,6 @@ public class BankAccountService {
     }
 
     public void transferBalance(Long sourceId, Long destId, Double amount) {
-        /* String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Customer customer = customerRepo.findByUsername(username); */
-
         if (sourceId == destId) {
             throw new BankAccountHandlingException("Can't transfer to the same account!");
         }

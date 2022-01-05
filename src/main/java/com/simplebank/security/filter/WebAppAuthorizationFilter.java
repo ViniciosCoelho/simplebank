@@ -57,6 +57,7 @@ public class WebAppAuthorizationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             response.setHeader(ERROR, e.getMessage());
             response.setStatus(HttpStatus.FORBIDDEN.value());
+            
             Map<String, String> error = new HashMap<>();
             error.put(ERROR_MSG, e.getMessage());
             response.setContentType(APPLICATION_JSON_VALUE);

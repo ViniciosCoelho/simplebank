@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO This will need an update to get the user from the JWT Token.
 @RestController
 @RequestMapping(path = "account")
 public class BankAccountController {
