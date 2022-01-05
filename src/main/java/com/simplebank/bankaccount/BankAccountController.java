@@ -24,17 +24,15 @@ public class BankAccountController {
     }
 
     @PostMapping
-    public BankAccount createBankAccount(
-        @RequestParam("ownerId") Long ownerId,
-        @RequestParam("balance") Optional<Double> balance) {
-        return bankAccountServ.createAccount(ownerId, balance);
+    public BankAccount createBankAccount(@RequestParam("balance") Optional<Double> balance) {
+        return bankAccountServ.createAccount(balance);
     }
 
     @PutMapping(path = "transfer/{sourceId}")
     public void transferBalance(
-        @PathVariable(name = "sourceId") Long sourceId,
-        @RequestParam("destId") Long destId,
-        @RequestParam("amount") Double amount) {
+            @PathVariable(name = "sourceId") Long sourceId,
+            @RequestParam("destId") Long destId,
+            @RequestParam("amount") Double amount) {
         bankAccountServ.transferBalance(sourceId, destId, amount);
     }
 

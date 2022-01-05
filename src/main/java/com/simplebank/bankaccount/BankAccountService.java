@@ -9,6 +9,7 @@ import com.simplebank.customer.CustomerRepository;
 import com.simplebank.customer.exceptions.CustomerHandlingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 // TODO This will need an update to get the user from the JWT Token.
@@ -20,32 +21,40 @@ public class BankAccountService {
 
     @Autowired
     public BankAccountService(
-        BankAccountRepository bankAccountRepo,
-        CustomerRepository customerRepo,
-        BankAccountTransactionRepository accTransactionsRepo) {
+            BankAccountRepository bankAccountRepo,
+            CustomerRepository customerRepo,
+            BankAccountTransactionRepository accTransactionsRepo) {
         this.bankAccountRepo = bankAccountRepo;
         this.customerRepo = customerRepo;
         this.accTransactionsRepo = accTransactionsRepo;
     }
 
-    public BankAccount createAccount(Long ownerId, Optional<Double> balance) {
+    public BankAccount createAccount(Optional<Double> balance) {
         Double actualBalance = 0.0D;
 
         if (balance.isPresent()) {
             actualBalance = balance.get();
+
+            if (actualBalance < 0.0D) {
+                actualBalance = 0.0D;
+            }
         }
 
-        Optional<Customer> customer = customerRepo.findById(ownerId);
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Customer customer = customerRepo.findByUsername(username);
 
-        if (!customer.isPresent()) {
+        if (customer == null) {
             throw new CustomerHandlingException("Invalid owner!");
         }
         
-        BankAccount account = new BankAccount(customer.get(), actualBalance);
+        BankAccount account = new BankAccount(customer, actualBalance);
         return bankAccountRepo.save(account);
     }
 
     public void transferBalance(Long sourceId, Long destId, Double amount) {
+        /* String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Customer customer = customerRepo.findByUsername(username); */
+
         if (sourceId == destId) {
             throw new BankAccountHandlingException("Can't transfer to the same account!");
         }
@@ -60,13 +69,15 @@ public class BankAccountService {
             throw new BankAccountHandlingException("Invalid account!");
         }
 
+        BankAccount account = bankAccount.get();
+        checkAccountOwnership(account);
+
         Boolean destAccountExists = bankAccountRepo.existsById(destId);
 
         if (!destAccountExists) {
             throw new BankAccountHandlingException("Invalid transfer account!");
         }
 
-        BankAccount account = bankAccount.get();
         Double balance = account.getBalance();
 
         if (balance < amount) {
@@ -83,16 +94,32 @@ public class BankAccountService {
             throw new BankAccountHandlingException("Invalid account!");
         }
 
+        BankAccount account = bankAccount.get();
+        checkAccountOwnership(account);
+
         return bankAccount.get().getBalance();
     }
 
     public List<BankAccountTransaction> getTransactions(Long id) {
-        Boolean accountExists = bankAccountRepo.existsById(id);
+        Optional<BankAccount> bankAccount = bankAccountRepo.findById(id);
 
-        if (!accountExists) {
+        if (!bankAccount.isPresent()) {
             throw new BankAccountHandlingException("Invalid account!");
         }
 
+        BankAccount account = bankAccount.get();
+        checkAccountOwnership(account);
+
         return accTransactionsRepo.findAllTransactionsById(id);
+    }
+
+    private void checkAccountOwnership(BankAccount bankAccount) {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Customer customer = customerRepo.findByUsername(username);
+        Long ownerId = bankAccount.getId();
+
+        if (ownerId != customer.getId()) {
+            throw new BankAccountHandlingException("Invalid account!");
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.simplebank.security.filter;
 
-import static com.simplebank.security.SecurityConstants.ACCESS_TOKEN;
 import static com.simplebank.security.SecurityConstants.BEARER;
 import static com.simplebank.security.SecurityConstants.ERROR;
 import static com.simplebank.security.SecurityConstants.ERROR_MSG;
@@ -8,7 +7,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.IOException;
-import java.net.http.HttpHeaders;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,9 +30,7 @@ import com.simplebank.security.SecurityConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.client.HttpClientErrorException.Forbidden;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class WebAppAuthorizationFilter extends OncePerRequestFilter {
